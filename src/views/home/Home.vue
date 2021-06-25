@@ -3,17 +3,22 @@
     <nav-bar class="home-nav">
       <div slot="center">购物街</div>
     </nav-bar>
+    <tab-control :titles="['流行', '新款', '精选']"
+                 @tabClick="tabClick"
+                 ref="tabControl1"
+                 class="tab-control2" v-show="isFixed"/>
     <scroll class="content"
             ref="scroll"
             :probetype="3"
             @scroll="showBacktop"
             :pull-up-load="true"
             @pullingUp="loadMore">
-    <home-swiper :banners="banners"></home-swiper>
+    <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad"></home-swiper>
     <recommend-view :recommends="recommends"></recommend-view>
     <feature-view></feature-view>
     <tab-control :titles="['流行', '新款', '精选']" class="tab-control"
-                 @tabClick="tabClick"></tab-control>
+                 @tabClick="tabClick"
+                 ref="tabControl"></tab-control>
     <goods-list :lists="showGoods"></goods-list>
     </scroll>
     <back-top @click.native="backClick" v-show="isShowTop"></back-top>
@@ -45,6 +50,8 @@ export default {
       },
       currentType: 'pop',
       isShowTop: false,
+      tabOffsetTop:0,
+      isFixed:false
     }
   },
   created() {
@@ -80,12 +87,19 @@ export default {
           this.currentType = 'sell';
           break;
       }
+      this.$refs.tabControl1.currentIndex = index;
+      this.$refs.tabControl.currentIndex = index;
     },
     showBacktop(position){
       this.isShowTop = (-position.y)>1000
+
+      this.isFixed = (-position.y)>this.tabOffsetTop
     },
     loadMore(){
       this.getHomeGoods(this.currentType)
+    },
+    swiperImageLoad(){
+      this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop
     },
     /**
      * 网络请求相关方法
@@ -121,18 +135,18 @@ export default {
   background-color: var(--color-tint);
   color: #fff;
 
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 9;
+  /*position: fixed;*/
+  /*left: 0;*/
+  /*right: 0;*/
+  /*top: 0;*/
+  /*z-index: 9;*/
 }
 
-.tab-control {
-  position: sticky;
-  top: 44px;
-  z-index: 9;
-}
+/*.tab-control {*/
+/*  position: sticky;*/
+/*  top: 44px;*/
+/*  z-index: 9;*/
+/*}*/
 .content{
   overflow: hidden;
   position: absolute;
@@ -140,5 +154,9 @@ export default {
   bottom: 49px;
   left: 0;
   right: 0;
+}
+.tab-control2 {
+  position: relative;
+  z-index: 9;
 }
 </style>
